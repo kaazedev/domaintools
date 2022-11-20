@@ -6,6 +6,8 @@ import (
 	"github.com/ammario/ipisp/v2"
 	"github.com/fatih/color"
 	"github.com/ipinfo/go/v2/ipinfo"
+	"github.com/likexian/whois"
+	whois_parser "github.com/likexian/whois-parser"
 	"github.com/pearleascent/domaintools/internal/crt"
 	"log"
 	"net"
@@ -16,35 +18,38 @@ func NSLookup(domain string) {
 	color.HiYellow("Searching for NSs...")
 	ns, err := net.LookupNS(domain)
 	if err != nil {
-		panic(err)
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
 	}
 
 	for i, n := range ns {
 		fmt.Printf("%s %s\n", color.HiGreenString("[%d]", i), color.HiWhiteString(n.Host))
 	}
 
-	fmt.Println(color.HiGreenString("Total NSs: %d\n", len(ns)))
+	fmt.Println(color.HiGreenString("Total NSs: %d\n\n", len(ns)))
 }
 
 func MXLookup(domain string) {
 	color.HiYellow("Searching for MXs...")
 	mx, err := net.LookupMX(domain)
 	if err != nil {
-		panic(err)
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
 	}
 
 	for i, n := range mx {
 		fmt.Printf("%s %s\n", color.HiGreenString("[%d]", i), color.HiWhiteString(n.Host))
 	}
 
-	fmt.Println(color.HiGreenString("Total MXs: %d\n", len(mx)))
+	fmt.Println(color.HiGreenString("Total MXs: %d\n\n", len(mx)))
 }
 
 func CNAMELookup(domain string) {
 	color.HiYellow("Searching for CNAME...")
 	cname, err := net.LookupCNAME(domain)
 	if err != nil {
-		panic(err)
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
 	}
 
 	fmt.Printf("%s %s\n", color.HiGreenString("[CNAME]"), color.HiWhiteString(cname))
@@ -55,21 +60,23 @@ func TXTLookup(domain string) {
 	color.HiYellow("Searching for TXTs...")
 	txt, err := net.LookupTXT(domain)
 	if err != nil {
-		panic(err)
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
 	}
 
 	for i, n := range txt {
 		fmt.Printf("%s %s\n", color.HiGreenString("[%d]", i), color.HiWhiteString(n))
 	}
 
-	fmt.Println(color.HiGreenString("Total TXTs: %d\n", len(txt)))
+	fmt.Println(color.HiGreenString("Total TXTs: %d\n\n", len(txt)))
 }
 
 func ALookup(domain string) {
 	color.HiYellow("Searching for IPs...")
 	ip, err := net.LookupIP(domain)
 	if err != nil {
-		panic(err)
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
 	}
 
 	for i, n := range ip {
@@ -113,14 +120,15 @@ func ALookup(domain string) {
 		)
 	}
 
-	fmt.Println(color.HiGreenString("Total IPs: %d\n", len(ip)))
+	fmt.Println(color.HiGreenString("Total IPs: %d\n\n", len(ip)))
 }
 
 func Subdomains(name string) {
 	color.HiYellow("Searching for subdomains...")
 	subdomain, err := crt.RequestCRT(name)
 	if err != nil {
-		panic(err)
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
 	}
 
 	data := crt.RemoveDuplicate(subdomain)
@@ -130,5 +138,26 @@ func Subdomains(name string) {
 		fmt.Printf("%s %s\n", color.HiGreenString("[%d]", i), color.HiWhiteString(sub))
 	}
 
-	fmt.Println(color.HiGreenString("Total subdomains: %d\n", len(data)))
+	fmt.Println(color.HiGreenString("Total subdomains: %d\n\n", len(data)))
+}
+
+func Whois(name string) {
+	whoisRaw, err := whois.Whois(name)
+	if err != nil {
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
+	}
+
+	result, err := whois_parser.Parse(whoisRaw)
+	if err != nil {
+		fmt.Printf(color.HiRedString("Error: %s\n\n", err))
+		return
+	}
+
+	fmt.Printf("%s %s\n", color.HiGreenString("[Registrar Name]"), color.HiWhiteString(result.Registrar.Name))
+	fmt.Printf("%s %s\n", color.HiGreenString("[Registrar Email]"), color.HiWhiteString(result.Registrar.Email))
+	fmt.Printf("%s %s\n", color.HiGreenString("[Registrar Phone]"), color.HiWhiteString(result.Registrar.Phone))
+	fmt.Printf("%s %s\n", color.HiGreenString("[Registered At]"), color.HiWhiteString(result.Domain.CreatedDate))
+	fmt.Printf("%s %s\n", color.HiGreenString("[Expiration At]"), color.HiWhiteString(result.Domain.ExpirationDate))
+	fmt.Printf("%s %s\n", color.HiGreenString("[Status]"), color.HiWhiteString(result.Domain.Status[0]))
 }

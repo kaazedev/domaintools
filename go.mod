@@ -11,6 +11,9 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/haccer/available v0.0.0-20200921032034-0d552efb6cd4 // indirect
 	github.com/ipinfo/go/v2 v2.9.1 // indirect
+	github.com/likexian/gokit v0.25.9 // indirect
+	github.com/likexian/whois v1.14.3 // indirect
+	github.com/likexian/whois-parser v1.24.2 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
